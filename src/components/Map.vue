@@ -3,6 +3,8 @@
 </template>
 
 <script>
+/* global L */
+
 export default {
   name: 'Map',
   props: {
@@ -19,7 +21,7 @@ export default {
 
     const guessLayer =  L.geoJSON().addTo(map)
 
-    map.on('moveend', (event) => {
+    map.on('moveend', () => {
       const center = map.getCenter()
       this.$emit('mapMoved', {
         type: 'Point',
@@ -36,8 +38,8 @@ export default {
       this.mapClick(point)
     })
 
-    map.on('movestart', (event) => this.$emit('moveStart'))
-    map.on('moveend', (event) => this.$emit('moveEnd'))
+    map.on('movestart', () => this.$emit('moveStart'))
+    map.on('moveend', () => this.$emit('moveEnd'))
 
     this.guessLayer = guessLayer
     this.map = map

@@ -16,6 +16,8 @@
 </template>
 
 <script>
+/* global L */
+
 import distance from '@turf/distance'
 
 export default {
