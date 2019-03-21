@@ -82,7 +82,7 @@ export default {
 
 <style scoped>
 .container {
-  position: relative;
+
 }
 
 .marzipano {

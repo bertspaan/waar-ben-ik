@@ -2,19 +2,19 @@ import get from './fetch'
 
 const baseUrl = 'https://api.data.amsterdam.nl/panorama'
 
-function nearestUrl (point) {
+function nearestUrl (point, radius) {
   const [lon, lat] = point.coordinates
-  return `${baseUrl}/thumbnail/?lat=${lat}&lon=${lon}&width=438&radius=250`
+  return `${baseUrl}/panoramas/?near=${lon},${lat}&srid=4326&radius=${radius}&page_size=1`
 }
 
-function imageUrl (panoramaId) {
-  return `${baseUrl}/panoramas/${panoramaId}`
-}
-
-export default function nearestImage (point) {
-  return get(nearestUrl(point))
+export default function nearestImage (point, radius=250) {
+  return get(nearestUrl(point, radius))
     .then((nearest) => {
-      // TODO: error when empty!
-      return get(imageUrl(nearest.pano_id))
+      try {
+        const panorama = nearest._embedded.panoramas[0]
+        return panorama
+      } catch (err) {
+        throw new Error(`No panorama found within ${radius} meter of ${point.coordinates}!`)
+      }
     })
 }

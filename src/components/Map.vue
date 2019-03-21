@@ -1,15 +1,12 @@
 <template>
-  <div class="container">
-    <div class="map" ref="map" />
-  </div>
+  <div class="map" ref="map" />
 </template>
 
 <script>
 export default {
   name: 'Map',
   props: {
-    image: Object,
-    results: Object
+    image: Object
   },
   mounted: function () {
     const element = this.$refs.map
@@ -21,7 +18,6 @@ export default {
     }).addTo(map)
 
     const guessLayer =  L.geoJSON().addTo(map)
-    const resultsLayer =  L.geoJSON().addTo(map)
 
     map.on('moveend', (event) => {
       const center = map.getCenter()
@@ -40,23 +36,20 @@ export default {
       this.mapClick(point)
     })
 
-    this.guessLayer = guessLayer
-    this.resultsLayer = resultsLayer
+    map.on('movestart', (event) => this.$emit('moveStart'))
+    map.on('moveend', (event) => this.$emit('moveEnd'))
 
+    this.guessLayer = guessLayer
     this.map = map
   },
   watch: {
     image: function () {
-      this.resultsLayer.clearLayers()
-    },
-    results: function (newResults) {
       this.guessLayer.clearLayers()
-      this.resultsLayer.addData(newResults)
     }
   },
   methods: {
     mapClick: function (point) {
-      this.$emit('mapClicked', point)
+      this.$emit('click', point)
       this.guessLayer.clearLayers()
       this.guessLayer.addData(point)
     }
