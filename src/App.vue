@@ -1,8 +1,10 @@
 <template>
   <div id="app">
     <header>
-      <img src="./assets/andreas.svg" />
-      <h1>Waar ben ik?</h1>
+      <a href="#" @click="showSplash">
+        <img src="./assets/waar-ben-ik.svg"
+          alt="Waar ben ik?"/>
+      </a>
     </header>
     <Panorama class="panorama" :image="image" />
     <div v-if="!submittedPoint" :class="['inset', mapDragging ? 'dragging' : '']">
@@ -11,23 +13,23 @@
         @moveStart="handleMapMoveStart"
         @moveEnd="handleMapMoveEnd" />
       <div class="buttons">
-        <button class="new-image" @click="newImage">Ik weet ‘t niet…</button>
-        <button @click="submit" v:if :disabled="lastClickedPoint === undefined">Hier is ’t!</button>
+        <button class="new-image" @click="newImage">Weet ik niet</button>
+        <button @click="submit" v:if :disabled="lastClickedPoint === undefined">Hier ben ik</button>
       </div>
     </div>
-    <Splash v-if="showSplash" @hide="hideSplash" />
+    <Splash v-if="showingSplash" @hide="hideSplash" />
     <Results v-if="submittedPoint" :image="image" :submittedPoint="submittedPoint" @close="newImage" />
   </div>
 </template>
 
 <script>
-
 import Splash from './components/Splash.vue'
 import Panorama from './components/Panorama.vue'
 import Map from './components/Map.vue'
 import Results from './components/Results.vue'
 
 import get from './lib/fetch'
+import { post } from './lib/fetch'
 import nearestImage from './lib/api'
 import RandomPoint from './lib/random-point'
 
@@ -41,7 +43,7 @@ export default {
   },
   data: function () {
     return {
-      showSplash: true,
+      showingSplash: true,
       image: undefined,
       submittedPoint: undefined,
       error: undefined,
@@ -50,6 +52,10 @@ export default {
       mapDragging: false
     }
   },
+
+// if ('ontouchstart' in window) {
+
+
   mounted: function () {
     get('area-triangulation.geojson')
       .then((polygon) => {
@@ -70,11 +76,28 @@ export default {
     },
     submit: function () {
       if (this.image && this.lastClickedPoint) {
+        const submission = {
+          panoramaId: this.image.pano_id,
+          pointSubmission: this.lastClickedPoint,
+          pointLocation: {
+            type: 'Point',
+            coordinates: this.image.geometry.coordinates.slice(0, 2)
+          }
+        }
+
+        post('https://waar-ben-ik.glitch.me/submissions', submission)
+          .catch(() => {
+            // console.error(err.message)
+          })
+
         this.submittedPoint = this.lastClickedPoint
       }
     },
+    showSplash: function () {
+      this.showingSplash = true
+    },
     hideSplash: function () {
-      this.showSplash = false
+      this.showingSplash = false
     },
     handleMapClicked: function (point) {
       this.lastClickedPoint = point
@@ -90,44 +113,97 @@ export default {
 </script>
 
 <style>
+@import './assets/fonts.css';
+
 body {
+  position: absolute;
   margin: 0;
   padding: 0;
-
-  width: 100vw;
-  height: 100vh;
-
-  font-family: 'Open Sans';
+  width: 100%;
+  height: 100%;
+  font-family: 'SourceCode';
 }
 
 #app {
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-
   width: 100%;
   height: 100%;
 }
 
 header {
-  position: absolute;
-  box-sizing: border-box;
+  pointer-events: none;
   z-index: 999;
-  margin: 5px;
-  padding: 5px;
+
+  position: absolute;
   display: flex;
+  justify-content: flex-start;
+  width: 100%;
 }
 
-header h1 {
-  margin: 0;
-  font-size: 38px;
-  margin-left: 10px;
-  line-height: .8em;
-  text-shadow: 0 0 5px rgba(255, 255, 255, 0.9);
+header a {
+  pointer-events: all;
+  width: 130px;
+  padding: 10px;
+  margin: 18px 12px;
 }
 
-header img {
-  height: 100px;
+@media only screen and (max-width: 768px) {
+  header {
+    justify-content: center;
+  }
+
+  header a {
+    margin: 9px 6px;
+    width: 80px;
+  }
 }
+
+.modal > div {
+  background-color: #ec0000;
+  color: white;
+  text-align: center;
+}
+
+.modal > div img {
+  width: 200px;
+  margin: 0 auto;
+}
+
+button {
+  cursor: pointer;
+  background-color: white;
+  color: #ec0000;
+  font-weight: black;
+  text-transform: uppercase;
+  border-width: 2px;
+  border-style: solid;
+  border-color: white;
+  padding: 1em;
+  transition: background-color .2s;
+  max-width: 200px;
+  width: 200px;
+  margin: 0 auto;
+}
+
+button:not(disabled):hover {
+  background-color: #ec0000;
+  color: white;
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 .panorama {
   position: absolute;
@@ -144,7 +220,7 @@ header img {
   left: 0;
   width: 100%;
   height: 100%;
-  background-color: rgba(0, 0, 0, 0.7);
+  background-color: rgba(0, 0, 0, 0.8);
   padding: 10px;
   box-sizing: border-box;
 
@@ -154,76 +230,63 @@ header img {
 }
 
 .box {
-  background-color: white;
   padding: 1em;
   display: flex;
   flex-direction: column;
-  width: 400px;
+  width: 500px;
   max-width: 100%;
   max-height: 100%;
-  overflow-y: scroll;
+  overflow-y: auto;
 }
 
+p a, p a:visited {
+  color: white;
+  font-weight: bold;
+}
+
+
 .inset {
+  background-color: #ec0000;
   position: absolute;
   right: 0;
   bottom: 0;
   box-sizing: border-box;
   z-index: 999;
-  background-color: white;
   margin: 5px;
-  padding: 5px;
+  padding: 12px;
   display: flex;
   flex-direction: column;
 
-  height: 350px;
-  width: 350px;
+  height: 400px;
+  width: 400px;
   max-width: calc(100% - 10px);
-  max-height: 25%;
+  max-height: 45%;
 
   transition: width .1s, height .1s;
 }
 
 .inset:hover, .inset.dragging {
-  height: 400px;
-  width: 400px;
-  max-height: 40%;
+  /* height: 400px; */
+  /* width: 400px; */
+  /* max-height: 40%; */
 }
 
 .buttons {
   display: flex;
   justify-content: flex-end;
+  padding-top: 10px;
 }
 
-button {
-  display: inline-block;
-  text-align: center;
-  text-decoration: none;
-  cursor: pointer;
-
-  font-size: 18px;
-
-  margin: 2px 0;
-  border: solid 1px transparent;
-  border-radius: 2px;
-  padding: 0.5em 1em;
-
-  color: #ffffff;
-  background-color: #308424;
-}
-
-button:hover {
-  background-color: #23b10f;
-}
 
 button.new-image {
-  color: black;
-  background-color: white;
-  text-decoration: underline;
+  color: white;
+  background-color: #ec0000;
+  border: none;
+  /* text-decoration: underline; */
 }
 
 button.new-image:hover {
-  background-color: #eee  ;
+  /* background-color: #eee  ; */
 }
 
 button:disabled {

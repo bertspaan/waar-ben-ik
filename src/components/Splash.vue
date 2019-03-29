@@ -1,13 +1,19 @@
 <template>
   <div class="modal">
     <div class="box">
-      <h1>Waar ben ik?</h1>
+      <img src="../assets/waar-ben-ik.svg"
+          alt="Waar ben ik?"/>
+      <h2>
+        Je wordt gedropt op een willekeurige plek in Amsterdam.
+        Kun je raden waar je bent? Hoe dichterbij, hoe hoger je score.
+      </h2>
+      <button @click="start">Start</button>
       <p>
-        Dit spel dropt je op een willekeurige plek in Amsterdam. Raad waar je bent! Hoe dichterbij, hoe beter!
+        Gebaseerd op <a href="https://geoguessr.com/world/play">GeoGuessr</a>, maar dan voor
+        Amsterdam en gemaakt met open source-tools en Amsterdamse open data.
+        Lees meer over deze data op het <a href="https://amsterdam.github.io/datablog">Datablog van
+        data.amsterdam.nl</a>.
       </p>
-      <p>Gebaseerd op <a href="https://geoguessr.com/world/play">GeoGuessr</a>, maar dan voor Amsterdam en gemaakt met open source-tools en Amsterdamse open data. Lees meer over deze data op <a href="https://amsterdam.github.io/datablog">het Datablog van data.amsterdam.nl</a>!</p>
-      <button @click="start">Start!</button>
-      <img class="qrcode" src="../assets/qrcode.svg" />
     </div>
   </div>
 </template>
@@ -32,7 +38,4 @@ h1 {
   margin-top: 0;
 }
 
-.qrcode {
-  width: 200px;
-}
 </style>

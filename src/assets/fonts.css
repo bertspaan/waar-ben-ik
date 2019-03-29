@@ -1,0 +1,8 @@
+@font-face {
+  font-family: SourceCode;
+  src: url(SourceCodeVariable-Roman.otf) format('opentype');
+}
+
+html, body, button, input {
+  font-size: 15px;
+}
