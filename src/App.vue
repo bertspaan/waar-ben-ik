@@ -6,19 +6,25 @@
           alt="Waar ben ik?"/>
       </a>
     </header>
-    <Panorama class="panorama" :image="image" />
-    <div v-if="!submittedPoint" :class="['inset', mapDragging ? 'dragging' : '']">
-      <Map :image="image"
-        @click="handleMapClicked"
-        @moveStart="handleMapMoveStart"
-        @moveEnd="handleMapMoveEnd" />
-      <div class="buttons">
-        <button class="new-image" @click="newImage">Weet ik niet</button>
-        <button @click="submit" v:if :disabled="lastClickedPoint === undefined">Hier ben ik</button>
+    <main>
+      <Panorama class="panorama" :image="image" />
+      <div v-if="!submittedPoint" :class="['inset', mapDragging ? 'dragging' : '']">
+        <Map :image="image"
+          @click="handleMapClicked"
+          @moveStart="handleMapMoveStart"
+          @moveEnd="handleMapMoveEnd" />
+        <div class="buttons">
+          <button class="new-image" @click="newImage">Weet ik niet</button>
+          <button @click="submit" v:if :disabled="lastClickedPoint === undefined">Hier ben ik</button>
+        </div>
       </div>
-    </div>
-    <Splash v-if="showingSplash" @hide="hideSplash" />
-    <Results v-if="submittedPoint" :image="image" :submittedPoint="submittedPoint" @close="newImage" />
+    </main>
+    <template v-if="showingSplash">
+      <Splash @hide="hideSplash" />
+    </template>
+    <template v-else-if="submittedPoint">
+      <Results :image="image" :submittedPoint="submittedPoint" @close="newImage" />
+    </template>
   </div>
 </template>
 
@@ -144,19 +150,12 @@ header {
 header a {
   pointer-events: all;
   width: 130px;
-  padding: 10px;
   margin: 18px 12px;
 }
 
-@media only screen and (max-width: 768px) {
-  header {
-    justify-content: center;
-  }
-
-  header a {
-    margin: 9px 6px;
-    width: 80px;
-  }
+p a, p a:visited {
+  color: white;
+  font-weight: bold;
 }
 
 .modal > div {
@@ -191,26 +190,17 @@ button:not(disabled):hover {
   color: white;
 }
 
-
-
-
-
-
-
-
-
-
-
-
-
-
+main {
+  display: flex;
+  flex-direction: column;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+}
 
 .panorama {
-  position: absolute;
-  top: 0;
-  bottom: 0;
-  left: 0;
-  right: 0;
+  flex-basis: 100%;
 }
 
 .modal {
@@ -230,20 +220,14 @@ button:not(disabled):hover {
 }
 
 .box {
-  padding: 1em;
+  padding: 12px;
   display: flex;
   flex-direction: column;
-  width: 500px;
+  width: 600px;
   max-width: 100%;
   max-height: 100%;
   overflow-y: auto;
 }
-
-p a, p a:visited {
-  color: white;
-  font-weight: bold;
-}
-
 
 .inset {
   background-color: #ec0000;
@@ -282,16 +266,48 @@ button.new-image {
   color: white;
   background-color: #ec0000;
   border: none;
-  /* text-decoration: underline; */
+
 }
 
-button.new-image:hover {
-  /* background-color: #eee  ; */
-}
+
 
 button:disabled {
   opacity: 0.5;
   cursor: default;
+}
+
+
+
+.leaflet-popup-content-wrapper {
+  font-family: 'SourceCode';
+  font-size: 18px;
+  border-radius: 0;
+}
+
+
+
+@media only screen and (max-width: 768px) {
+  header {
+    justify-content: center;
+  }
+
+  header a {
+    margin: 9px 6px;
+    width: 80px;
+  }
+
+  .inset {
+
+    right: auto;
+    bottom: auto;
+    position: static;
+    max-width: 100%;
+    width: 100%;
+
+    margin: 0;
+    height: 80%;
+
+  }
 }
 
 </style>

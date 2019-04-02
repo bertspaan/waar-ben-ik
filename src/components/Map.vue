@@ -30,8 +30,6 @@ export default {
       }
     }).addTo(map)
 
-
-
     map.on('moveend', () => {
       const center = map.getCenter()
       this.$emit('mapMoved', {

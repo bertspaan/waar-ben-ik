@@ -1,5 +1,5 @@
 <template>
-  <div class="container">
+  <div>
     <div class="marzipano" ref="marzipano" />
   </div>
 </template>
@@ -81,10 +81,6 @@ export default {
 </script>
 
 <style scoped>
-.container {
-
-}
-
 .marzipano {
   width: 100%;
   height: 100%;

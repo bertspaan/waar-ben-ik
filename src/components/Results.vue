@@ -5,9 +5,6 @@
         <div class="distance">
           {{ displayDistance }}
         </div>
-        <div v-if="distanceToImage > 10000" class="emoji">
-          😩
-        </div>
         <div>
           <ol class="stars">
             <li v-for="point in points" :key="point">
@@ -22,15 +19,7 @@
         </div>
       </div>
       <div class="map" ref="map" />
-
-      <div>
-        <!-- <ol>
-
-        </ol> -->
-      </div>
-      <div><a :href="url">Open deze panorama in data.amsterdam.nl</a>.</div>
-      <button @click="closeClick">Volgende foto!</button>
-
+      <button @click="closeClick">Volgende foto</button>
     </div>
   </div>
 </template>
@@ -68,6 +57,7 @@ export default {
     }).addTo(map)
 
     const resultsLayer =  L.geoJSON(this.geojson, {
+      onEachFeature: this.createPopup,
       pointToLayer: function (feature, latLng) {
         if (feature.properties.type === 'submission') {
           return marker(latLng)
@@ -87,7 +77,7 @@ export default {
     }).addTo(map)
 
     map.fitBounds(resultsLayer.getBounds(), {
-      padding: [2, 2]
+      padding: [20, 20]
     })
 
     this.resultsLayer = resultsLayer
@@ -97,6 +87,17 @@ export default {
   methods: {
     closeClick: function () {
       this.$emit('close')
+    },
+    mapUrl: function (point) {
+      const coordinates = point.coordinates
+      return `https://data.amsterdam.nl/data/geozoek/?modus=kaart&legenda=true&locatie=${coordinates[1]}%2C${coordinates[0]}`
+    },
+    createPopup: function (feature, layer) {
+      if (feature.properties.type === 'submission' || feature.properties.panoramaId) {
+        const mapUrl = this.mapUrl(feature.geometry)
+        const link = `<a href="${mapUrl}" target="_blank">Bekijk deze locatie</a>`
+        layer.bindPopup(link)
+      }
     }
   },
   computed: {
@@ -124,7 +125,7 @@ export default {
           {
             type: 'Feature',
             properties: {
-              type: 'image'
+              panoramaId: this.image.pano_id
             },
             geometry: this.image.geometry
           },
@@ -170,6 +171,10 @@ export default {
   align-items: center;
 }
 
+.score, .map {
+  margin-bottom: 12px;
+}
+
 .stars {
   list-style-type: none;
   display: flex;
@@ -181,17 +186,13 @@ export default {
 
 .distance {
   font-size: 2em;
-  line-height: 2em;
+  line-height: 1em;
   font-weight: bold;
 }
 
 .stars img {
   width: 2em;
-  padding: 6px;
+  padding: 0 6px;
 }
 
-.emoji {
-  font-size: 2.2em;
-  line-height: 2em;
-}
 </style>

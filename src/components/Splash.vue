@@ -9,10 +9,13 @@
       </h2>
       <button @click="start">Start</button>
       <p>
-        Gebaseerd op <a href="https://geoguessr.com/world/play">GeoGuessr</a>, maar dan voor
+        Geïnspireerd door <a href="https://geoguessr.com/world/play">GeoGuessr</a>, maar dan voor
         Amsterdam en gemaakt met open source-tools en Amsterdamse open data.
-        Lees meer over deze data op het <a href="https://amsterdam.github.io/datablog">Datablog van
+        Lees meer over deze data op het <a href="https://amsterdam.github.io/datablog/2019/03/21/360-gradenfotos-van-de-hele-stad/">Datablog van
         data.amsterdam.nl</a>.
+      </p>
+      <p>
+        Gemaakt door <a href="https://bertspaan.nl/">Bert Spaan</a>, ontworpen door <a href="http://luukvandeven.nl/">Luuk van de Ven</a>.
       </p>
     </div>
   </div>
