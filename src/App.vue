@@ -9,6 +9,7 @@
     <main>
       <Panorama class="panorama" :image="image" />
       <div v-if="!submittedPoint" :class="['inset', mapDragging ? 'dragging' : '']">
+        <!-- <button>Laat kaart zien</button> -->
         <Map :image="image"
           @click="handleMapClicked"
           @moveStart="handleMapMoveStart"
@@ -127,12 +128,9 @@ body {
   padding: 0;
   width: 100%;
   height: 100%;
-  font-family: 'SourceCode';
 }
 
 #app {
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
   width: 100%;
   height: 100%;
 }
@@ -173,19 +171,19 @@ button {
   cursor: pointer;
   background-color: white;
   color: #ec0000;
-  font-weight: black;
+  font-weight: bold;
   text-transform: uppercase;
   border-width: 2px;
   border-style: solid;
   border-color: white;
   padding: 1em;
-  transition: background-color .2s;
+  transition: background-color .1s, border-color .1s;
   max-width: 200px;
   width: 200px;
   margin: 0 auto;
 }
 
-button:not(disabled):hover {
+button:not(:disabled):hover {
   background-color: #ec0000;
   color: white;
 }
@@ -249,42 +247,35 @@ main {
   transition: width .1s, height .1s;
 }
 
-.inset:hover, .inset.dragging {
-  /* height: 400px; */
-  /* width: 400px; */
-  /* max-height: 40%; */
-}
-
 .buttons {
+  flex-shrink: 0;
   display: flex;
   justify-content: flex-end;
   padding-top: 10px;
 }
 
+.buttons > div:not(:first-child) {
+  margin-left: 10px;
+}
 
 button.new-image {
   color: white;
   background-color: #ec0000;
-  border: none;
-
+  border-color: #ec0000;
 }
 
-
+.new-image:not(:disabled):hover {
+  border-color: white;
+}
 
 button:disabled {
   opacity: 0.5;
   cursor: default;
 }
 
-
-
 .leaflet-popup-content-wrapper {
-  font-family: 'SourceCode';
-  font-size: 18px;
   border-radius: 0;
 }
-
-
 
 @media only screen and (max-width: 768px) {
   header {
@@ -296,8 +287,11 @@ button:disabled {
     width: 80px;
   }
 
-  .inset {
+  .modal {
+    padding: 0;
+  }
 
+  .inset {
     right: auto;
     bottom: auto;
     position: static;
@@ -306,7 +300,6 @@ button:disabled {
 
     margin: 0;
     height: 80%;
-
   }
 }
 

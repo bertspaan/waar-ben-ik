@@ -7,6 +7,9 @@
         Je wordt gedropt op een willekeurige plek in Amsterdam.
         Kun je raden waar je bent? Hoe dichterbij, hoe hoger je score.
       </h2>
+      <p>
+        Gebruik je muis of je touch screen om rond te kijken, net zoals met Google Street View.
+      </p>
       <button @click="start">Start</button>
       <p>
         Geïnspireerd door <a href="https://geoguessr.com/world/play">GeoGuessr</a>, maar dan voor
@@ -39,6 +42,10 @@ export default {
 
 h1 {
   margin-top: 0;
+}
+
+h2 {
+  margin: 0;
 }
 
 </style>

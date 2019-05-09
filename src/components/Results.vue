@@ -39,7 +39,7 @@ export default {
   data: function () {
     return {
       points: [
-        2000,
+        5000,
         1000,
         500,
         100,
@@ -193,6 +193,12 @@ export default {
 .stars img {
   width: 2em;
   padding: 0 6px;
+}
+
+@media only screen and (max-height: 568px) {
+  .map {
+    height: 400px;
+  }
 }
 
 </style>

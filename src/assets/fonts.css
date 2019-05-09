@@ -1,8 +1,17 @@
-@font-face {
-  font-family: SourceCode;
-  src: url(SourceCodeVariable-Roman.otf) format('opentype');
+html, body, button, input,
+.leaflet-popup-content-wrapper {
+  font-size: 15px;
+  font-family: 'Source Code Pro', monospace;
 }
 
-html, body, button, input {
-  font-size: 15px;
+body {
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+@media only screen and (max-width: 500px) {
+  html, body, button, input,
+  .leaflet-popup-content-wrapper {
+    font-size: 13px;
+  }
 }
