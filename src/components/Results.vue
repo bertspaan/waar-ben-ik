@@ -51,8 +51,11 @@ export default {
     const element = this.$refs.map
     const map = L.map(element)
 
-    L.tileLayer('https://{s}.data.amsterdam.nl/topo_wm_light/{z}/{x}/{y}.png', {
-      subdomains: ['t1', 't2', 't3', 't4'],
+    // const tileUrl = 'https://{s}.data.amsterdam.nl/topo_wm_light/{z}/{x}/{y}.png'
+    const tileUrl = 'https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}.png'
+
+    L.tileLayer(tileUrl, {
+      // subdomains: ['t1', 't2', 't3', 't4'],
       maxZoom: 19
     }).addTo(map)
 

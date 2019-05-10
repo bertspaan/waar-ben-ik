@@ -8,15 +8,22 @@
     </header>
     <main>
       <Panorama class="panorama" :image="image" />
-      <div v-if="!submittedPoint" :class="['inset', mapDragging ? 'dragging' : '']">
-        <!-- <button>Laat kaart zien</button> -->
-        <Map :image="image"
-          @click="handleMapClicked"
-          @moveStart="handleMapMoveStart"
-          @moveEnd="handleMapMoveEnd" />
-        <div class="buttons">
-          <button class="new-image" @click="newImage">Weet ik niet</button>
-          <button @click="submit" v:if :disabled="lastClickedPoint === undefined">Hier ben ik</button>
+      <div v-if="!submittedPoint && !showingSplash"
+        :class="['inset', mapToggled ? 'toggled' : '']">
+        <div class="inset-toggle">
+          <Map :image="image" @click="handleMapClicked" :toggled="mapToggled" />
+          <div class="buttons">
+            <button class="new-image" @click="newImage">Weet ik niet</button>
+            <button @click="submit" v:if :disabled="lastClickedPoint === undefined">Hier ben ik</button>
+          </div>
+        </div>
+        <div class="buttons show-map">
+          <template v-if="mapToggled">
+            <button @click="toggle">Terug naar de foto</button>
+          </template>
+          <template v-else>
+            <button @click="toggle">Laat kaart zien</button>
+          </template>
         </div>
       </div>
     </main>
@@ -51,18 +58,14 @@ export default {
   data: function () {
     return {
       showingSplash: true,
+      mapToggled: false,
       image: undefined,
       submittedPoint: undefined,
       error: undefined,
       randomPoint: undefined,
-      lastClickedPoint: undefined,
-      mapDragging: false
+      lastClickedPoint: undefined
     }
   },
-
-// if ('ontouchstart' in window) {
-
-
   mounted: function () {
     get('area-triangulation.geojson')
       .then((polygon) => {
@@ -72,6 +75,7 @@ export default {
   },
   methods: {
     newImage: function () {
+      this.mapToggled = false
       if (this.randomPoint) {
         nearestImage(this.randomPoint())
           .then((image) => {
@@ -80,6 +84,9 @@ export default {
             this.image = image
         })
       }
+    },
+    toggle: function () {
+      this.mapToggled = !this.mapToggled
     },
     submit: function () {
       if (this.image && this.lastClickedPoint) {
@@ -108,12 +115,6 @@ export default {
     },
     handleMapClicked: function (point) {
       this.lastClickedPoint = point
-    },
-    handleMapMoveStart: function () {
-      this.mapDragging = true
-    },
-    handleMapMoveEnd: function () {
-      this.mapDragging = false
     }
   }
 }
@@ -189,8 +190,6 @@ button:not(:disabled):hover {
 }
 
 main {
-  display: flex;
-  flex-direction: column;
   top: 0;
   left: 0;
   width: 100%;
@@ -198,12 +197,17 @@ main {
 }
 
 .panorama {
-  flex-basis: 100%;
+  width: 100%;
+  height: 100%;
+}
+
+.panorama, .panorama .marzipano > * {
+  cursor: grab;
 }
 
 .modal {
   position: absolute;
-  z-index: 1000;
+  z-index: 1001;
   top: 0;
   left: 0;
   width: 100%;
@@ -211,40 +215,57 @@ main {
   background-color: rgba(0, 0, 0, 0.8);
   padding: 10px;
   box-sizing: border-box;
-
   display: flex;
   align-items: center;
   justify-content: center;
 }
 
 .box {
-  padding: 12px;
+  padding: 10px;
   display: flex;
   flex-direction: column;
+  justify-content: space-between;
   width: 600px;
   max-width: 100%;
   max-height: 100%;
   overflow-y: auto;
+  box-sizing: border-box;
+}
+
+.buttons.show-map {
+  display: none;
 }
 
 .inset {
-  background-color: #ec0000;
   position: absolute;
+  z-index: 1000;
+  box-sizing: border-box;
   right: 0;
   bottom: 0;
   box-sizing: border-box;
-  z-index: 999;
-  margin: 5px;
-  padding: 12px;
-  display: flex;
-  flex-direction: column;
-
+  padding: 5px;
   height: 400px;
   width: 400px;
   max-width: calc(100% - 10px);
-  max-height: 45%;
+  max-height: 50%;
+}
 
-  transition: width .1s, height .1s;
+.inset > * {
+  background-color: #ec0000;
+  box-sizing: border-box;
+  padding: 10px;
+  pointer-events: all;
+}
+
+.inset > *:not(:last-child) {
+  /* padding-bottom: 12px; */
+}
+
+.inset-toggle {
+  transition: width .1s, height .1s, padding .1s;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
 }
 
 .buttons {
@@ -252,9 +273,10 @@ main {
   display: flex;
   justify-content: flex-end;
   padding-top: 10px;
+  /* padding: 10px; */
 }
 
-.buttons > div:not(:first-child) {
+.buttons > button:not(:first-child) {
   margin-left: 10px;
 }
 
@@ -291,15 +313,39 @@ button:disabled {
     padding: 0;
   }
 
-  .inset {
-    right: auto;
-    bottom: auto;
-    position: static;
-    max-width: 100%;
-    width: 100%;
+  .box {
+    height: 100%;
+  }
 
-    margin: 0;
-    height: 80%;
+  .buttons.show-map {
+    display: flex;
+  }
+
+  .inset {
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    max-width: 100%;
+    max-height: 100%;
+    padding: 0;
+
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    pointer-events: none;
+  }
+
+  .inset-toggle {
+    height: 0;
+    overflow: hidden;
+    padding: 0 10px;
+  }
+
+  .toggled .inset-toggle {
+    height: 100%;
+    padding: 10px;
+    padding-bottom: 0;
   }
 }
 

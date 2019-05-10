@@ -10,7 +10,8 @@ import { marker } from '../lib/markers'
 export default {
   name: 'Map',
   props: {
-    image: Object
+    image: Object,
+    toggled: Boolean
   },
   mounted: function () {
     const element = this.$refs.map
@@ -30,14 +31,6 @@ export default {
       }
     }).addTo(map)
 
-    map.on('moveend', () => {
-      const center = map.getCenter()
-      this.$emit('mapMoved', {
-        type: 'Point',
-        coordinates: [center.lng, center.lat]
-      })
-    })
-
     map.on('click', (event) => {
       const point = {
         type: 'Point',
@@ -47,15 +40,19 @@ export default {
       this.mapClick(point)
     })
 
-    map.on('movestart', () => this.$emit('moveStart'))
-    map.on('moveend', () => this.$emit('moveEnd'))
-
     this.guessLayer = guessLayer
     this.map = map
   },
   watch: {
     image: function () {
       this.guessLayer.clearLayers()
+    },
+    toggled: function () {
+      if (this.toggled) {
+        window.setTimeout(() => {
+          this.map.invalidateSize()
+        }, 150)
+      }
     }
   },
   methods: {
