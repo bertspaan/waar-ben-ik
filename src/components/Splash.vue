@@ -19,7 +19,7 @@
         data.amsterdam.nl</a>.
       </p>
       <p>
-        Gemaakt door <a href="https://bertspaan.nl/">Bert Spaan</a>, ontworpen door <a href="http://luukvandeven.nl/">Luuk van de Ven</a>.
+        Gemaakt door <a href="https://bertspaan.nl/">Bert Spaan</a>, ontworpen door <a href="http://luukvandeven.nl/">Luuk van de Ven</a>. De broncode staat <a href="https://github.com/bertspaan/waar-ben-ik">op GitHub</a>.
       </p>
     </div>
   </div>
