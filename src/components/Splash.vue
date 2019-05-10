@@ -8,7 +8,7 @@
         Kun je raden waar je bent? Hoe dichterbij, hoe hoger je score.
       </h2>
       <p>
-        Gebruik je muis of je touch screen om rond te kijken, net zoals met Google Street View.
+        Gebruik je muis of je touchscreen om rond te kijken, net zoals met Google Street View.
         Klik in de kaart als je weet waar de foto genomen is.
       </p>
       <button @click="start">Start</button>
