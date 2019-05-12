@@ -39,11 +39,11 @@ export default {
   data: function () {
     return {
       points: [
-        5000,
+        10000,
+        2000,
         1000,
-        500,
-        100,
-        25
+        200,
+        50
       ]
     }
   },
