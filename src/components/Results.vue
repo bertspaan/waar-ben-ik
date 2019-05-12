@@ -29,6 +29,7 @@
 
 import distance from '@turf/distance'
 import { marker, flag } from '../lib/markers'
+import { formatDistance } from '../lib/util.js';
 
 export default {
   name: 'Results',
@@ -89,7 +90,7 @@ export default {
 
   methods: {
     closeClick: function () {
-      this.$emit('close')
+      this.$emit('close', this.distanceToImage);
     },
     mapUrl: function (point) {
       const coordinates = point.coordinates
@@ -110,13 +111,7 @@ export default {
      }))
     },
     displayDistance: function () {
-      if (this.distanceToImage < 1000) {
-        return `${this.distanceToImage} meter`
-      } else if (this.distanceToImage < 10000) {
-        return `${Math.round(this.distanceToImage / 10) / 100} km`
-      } else {
-        return `${Math.round(this.distanceToImage / 100) / 10} km`
-      }
+      return formatDistance(this.distanceToImage);
     },
     url: function () {
       return `https://data.amsterdam.nl/data/panorama/${this.image.pano_id}/?modus=volledig`

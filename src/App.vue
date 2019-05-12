@@ -26,12 +26,18 @@
           </template>
         </div>
       </div>
+      <div class="round-indicator">
+        <span class="round-indicator__text">{{this.rounds.length + 1}}/{{this.nrOfRounds}}</span>
+      </div>
     </main>
     <template v-if="showingSplash">
       <Splash @hide="hideSplash" />
     </template>
     <template v-else-if="submittedPoint">
-      <Results :image="image" :submittedPoint="submittedPoint" @close="newImage" />
+      <Results :image="image" :submittedPoint="submittedPoint" @close="nextImage" />
+    </template>
+    <template v-else-if="showEndResults">
+      <EndResults :rounds="rounds" @close="reset" />
     </template>
   </div>
 </template>
@@ -41,6 +47,7 @@ import Splash from './components/Splash.vue'
 import Panorama from './components/Panorama.vue'
 import Map from './components/Map.vue'
 import Results from './components/Results.vue'
+import EndResults from './components/EndResults.vue';
 
 import get from './lib/fetch'
 import { post } from './lib/fetch'
@@ -53,17 +60,21 @@ export default {
     Splash,
     Panorama,
     Map,
-    Results
+    Results,
+    EndResults
   },
   data: function () {
     return {
-      showingSplash: true,
+      showingSplash: false,
       mapToggled: false,
       image: undefined,
       submittedPoint: undefined,
       error: undefined,
       randomPoint: undefined,
-      lastClickedPoint: undefined
+      lastClickedPoint: undefined,
+      nrOfRounds: 2,
+      rounds: [],
+      showEndResults : false
     }
   },
   mounted: function () {
@@ -74,6 +85,17 @@ export default {
       .then(this.newImage)
   },
   methods: {
+    nextImage(distanceToImage) {
+        this.rounds.push(distanceToImage);
+
+        if (this.rounds.length === this.nrOfRounds) {
+          this.submittedPoint = undefined;
+          this.mapToggled = false;
+          this.showEndResults = true;
+        } else {
+          this.newImage();
+        }
+    },
     newImage: function () {
       this.mapToggled = false
       if (this.randomPoint) {
@@ -84,6 +106,9 @@ export default {
             this.image = image
         })
       }
+    },
+    reset() {
+      window.location.reload();
     },
     toggle: function () {
       this.mapToggled = !this.mapToggled
@@ -297,6 +322,20 @@ button:disabled {
 
 .leaflet-popup-content-wrapper {
   border-radius: 0;
+}
+
+.round-indicator {
+  position: absolute;
+  background-color: #ec0000;
+  top: 5px;
+  right: 5px;
+  padding: 5px 10px;
+}
+
+.round-indicator__text {
+  font-family: 'Source Code Pro', monospace;
+  color: white;
+  font-weight: bold;
 }
 
 @media only screen and (max-width: 768px) {
