@@ -65,14 +65,14 @@ export default {
   },
   data: function () {
     return {
-      showingSplash: false,
+      showingSplash: true,
       mapToggled: false,
       image: undefined,
       submittedPoint: undefined,
       error: undefined,
       randomPoint: undefined,
       lastClickedPoint: undefined,
-      nrOfRounds: 2,
+      nrOfRounds: 5,
       rounds: [],
       showEndResults : false
     }
