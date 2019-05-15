@@ -54,6 +54,8 @@ import { post } from './lib/fetch'
 import nearestImage from './lib/api'
 import RandomPoint from './lib/random-point'
 
+const devMode = process.env && process.env.NODE_ENV === 'development'
+
 export default {
   name: 'app',
   components: {
@@ -124,10 +126,12 @@ export default {
           }
         }
 
-        post('https://waar-ben-ik.glitch.me/submissions', submission)
-          .catch(() => {
-            // console.error(err.message)
-          })
+        if (!devMode) {
+          post('https://waar-ben-ik.glitch.me/submissions', submission)
+            .catch(() => {
+              // console.error(err.message)
+            })
+        }
 
         this.submittedPoint = this.lastClickedPoint
       }
