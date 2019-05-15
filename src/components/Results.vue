@@ -6,16 +6,7 @@
           {{ displayDistance }}
         </div>
         <div>
-          <ol class="stars">
-            <li v-for="point in points" :key="point">
-              <template v-if="distanceToImage <= point">
-                <img src="../assets/star-white.svg" />
-              </template>
-              <template v-else>
-                <img src="../assets/star-transparent.svg" />
-              </template>
-            </li>
-          </ol>
+          <stars :distanceToImage="distanceToImage"></stars>
         </div>
       </div>
       <div class="map" ref="map" />
@@ -26,26 +17,17 @@
 
 <script>
 /* global L */
-
+import Stars from './Stars.vue';
 import distance from '@turf/distance'
 import { marker, flag } from '../lib/markers'
+import { formatDistance } from '../lib/util.js';
 
 export default {
+  components : { Stars },
   name: 'Results',
   props: {
     image: Object,
     submittedPoint: Object
-  },
-  data: function () {
-    return {
-      points: [
-        10000,
-        2000,
-        1000,
-        200,
-        50
-      ]
-    }
   },
   mounted: function () {
     const element = this.$refs.map
@@ -89,7 +71,7 @@ export default {
 
   methods: {
     closeClick: function () {
-      this.$emit('close')
+      this.$emit('close', this.distanceToImage);
     },
     mapUrl: function (point) {
       const coordinates = point.coordinates
@@ -110,13 +92,7 @@ export default {
      }))
     },
     displayDistance: function () {
-      if (this.distanceToImage < 1000) {
-        return `${this.distanceToImage} meter`
-      } else if (this.distanceToImage < 10000) {
-        return `${Math.round(this.distanceToImage / 10) / 100} km`
-      } else {
-        return `${Math.round(this.distanceToImage / 100) / 10} km`
-      }
+      return formatDistance(this.distanceToImage);
     },
     url: function () {
       return `https://data.amsterdam.nl/data/panorama/${this.image.pano_id}/?modus=volledig`
@@ -178,24 +154,10 @@ export default {
   margin-bottom: 12px;
 }
 
-.stars {
-  list-style-type: none;
-  display: flex;
-  flex-direction: row;
-  justify-content: flex-end;
-  margin: 0;
-  padding: 0;
-}
-
 .distance {
   font-size: 2em;
   line-height: 1em;
   font-weight: bold;
-}
-
-.stars img {
-  width: 2em;
-  padding: 0 6px;
 }
 
 @media only screen and (max-height: 568px) {
