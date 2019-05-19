@@ -12,19 +12,15 @@
 </template>
 
 <script>
+import { stars } from '../lib/util.js'
+
 export default {
   data() {
     return {
-      points: [
-        5000,
-        1000,
-        500,
-        100,
-        25
-      ]
+      points: stars
     }
   },
-  props : {
+  props: {
     distanceToImage: Number
   }
 }

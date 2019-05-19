@@ -3,7 +3,7 @@ import area from '@turf/area'
 export default function RandomPoint (triangulation) {
   const areas = triangulation.features
     .map((triangle) => area(triangle, {
-        units: 'meters'
+      units: 'meters'
     }))
 
   const totalArea = areas.reduce((sum, area) => sum + area, 0)

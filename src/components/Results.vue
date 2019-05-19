@@ -2,87 +2,48 @@
   <div class="modal">
     <div class="box">
       <div class="score">
-        <div class="distance">
-          {{ displayDistance }}
+        <div class="text">
+          <span class="distance">{{ displayDistance }}</span>: {{ points }}&nbsp;punten
         </div>
         <div>
           <stars :distanceToImage="distanceToImage"></stars>
         </div>
       </div>
       <div class="map" ref="map" />
-      <button @click="closeClick">Volgende foto</button>
+      <button @click="closeClick">{{buttonText}}</button>
     </div>
   </div>
 </template>
 
 <script>
-/* global L */
-import Stars from './Stars.vue';
+import Stars from './Stars.vue'
 import distance from '@turf/distance'
-import { marker, flag } from '../lib/markers'
-import { formatDistance } from '../lib/util.js';
+import { resultGeoJSON, addResultsLayer, calculatePoints, createMap, formatDistance } from '../lib/util.js'
 
 export default {
-  components : { Stars },
+  components: {
+    Stars
+  },
   name: 'Results',
   props: {
+    buttonText: String,
     image: Object,
     submittedPoint: Object
   },
   mounted: function () {
-    const element = this.$refs.map
-    const map = L.map(element)
+    const map = createMap(this.$refs.map)
 
-    // const tileUrl = 'https://{s}.data.amsterdam.nl/topo_wm_light/{z}/{x}/{y}.png'
-    const tileUrl = 'https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}.png'
+    const geojson = resultGeoJSON([{
+      image: this.image,
+      submittedPoint: this.submittedPoint
+    }])
 
-    L.tileLayer(tileUrl, {
-      // subdomains: ['t1', 't2', 't3', 't4'],
-      maxZoom: 19
-    }).addTo(map)
-
-    const resultsLayer =  L.geoJSON(this.geojson, {
-      onEachFeature: this.createPopup,
-      pointToLayer: function (feature, latLng) {
-        if (feature.properties.type === 'submission') {
-          return marker(latLng)
-        } else {
-          return flag(latLng)
-        }
-      },
-      style: function () {
-        return {
-          color: 'black',
-          weight: 4,
-          opacity: .7,
-          dashArray: '0,10',
-          lineJoin: 'round'
-        }
-      }
-    }).addTo(map)
-
-    map.fitBounds(resultsLayer.getBounds(), {
-      padding: [20, 20]
-    })
-
-    this.resultsLayer = resultsLayer
+    this.resultsLayer = addResultsLayer(map, geojson)
     this.map = map
   },
-
   methods: {
     closeClick: function () {
-      this.$emit('close', this.distanceToImage);
-    },
-    mapUrl: function (point) {
-      const coordinates = point.coordinates
-      return `https://data.amsterdam.nl/data/geozoek/?modus=kaart&legenda=true&locatie=${coordinates[1]}%2C${coordinates[0]}`
-    },
-    createPopup: function (feature, layer) {
-      if (feature.properties.type === 'submission' || feature.properties.panoramaId) {
-        const mapUrl = this.mapUrl(feature.geometry)
-        const link = `<a href="${mapUrl}" target="_blank">Bekijk deze locatie</a>`
-        layer.bindPopup(link)
-      }
+      this.$emit('close', this.distanceToImage)
     }
   },
   computed: {
@@ -91,43 +52,11 @@ export default {
         units: 'meters'
      }))
     },
+    points: function () {
+      return calculatePoints(this.distanceToImage)
+    },
     displayDistance: function () {
-      return formatDistance(this.distanceToImage);
-    },
-    url: function () {
-      return `https://data.amsterdam.nl/data/panorama/${this.image.pano_id}/?modus=volledig`
-    },
-    geojson: function () {
-      return {
-        type: 'FeatureCollection',
-        features: [
-          {
-            type: 'Feature',
-            properties: {
-              panoramaId: this.image.pano_id
-            },
-            geometry: this.image.geometry
-          },
-          {
-            type: 'Feature',
-            properties: {},
-            geometry: {
-              type: 'LineString',
-              coordinates: [
-                this.image.geometry.coordinates,
-                this.submittedPoint.coordinates
-              ]
-            }
-          },
-          {
-            type: 'Feature',
-            properties: {
-              type: 'submission'
-            },
-            geometry: this.submittedPoint
-          }
-        ]
-      }
+      return formatDistance(this.distanceToImage)
     }
   }
 }
@@ -154,9 +83,12 @@ export default {
   margin-bottom: 12px;
 }
 
-.distance {
+.score .text {
   font-size: 2em;
   line-height: 1em;
+}
+
+.score .text .distance {
   font-weight: bold;
 }
 
@@ -166,4 +98,9 @@ export default {
   }
 }
 
+@media only screen and (max-width: 768px) {
+  .map {
+    height: 100%;
+  }
+}
 </style>
