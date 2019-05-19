@@ -13,7 +13,7 @@
         <div class="inset-toggle">
           <Map :image="image" @click="handleMapClicked" :toggled="mapToggled" />
           <div class="buttons">
-            <button class="new-image" @click="newImage">Weet ik niet</button>
+            <button class="skip-image" @click="nextRound()">Weet ik niet</button>
             <button @click="submit" v:if :disabled="lastClickedPoint === undefined">Hier ben ik</button>
           </div>
         </div>
@@ -26,12 +26,25 @@
           </template>
         </div>
       </div>
+      <div class="game-status" v-if="!showEndResults">
+        <div class="rounds">
+          <span>Foto {{this.rounds.length + 1}}/{{this.nrOfRounds}}</span>
+        </div>
+        <div class="points">
+          <span>{{points}}&nbsp;punten</span>
+        </div>
+      </div>
     </main>
     <template v-if="showingSplash">
       <Splash @hide="hideSplash" />
     </template>
+    <template v-else-if="showEndResults">
+      <EndResults :rounds="rounds" @close="newGame" />
+    </template>
     <template v-else-if="submittedPoint">
-      <Results :image="image" :submittedPoint="submittedPoint" @close="newImage" />
+      <Results :image="image" :submittedPoint="submittedPoint"
+        :buttonText="(rounds.length === nrOfRounds - 1) ? 'Naar eindresultaat' : 'Volgende foto'"
+        @close="nextRound" />
     </template>
   </div>
 </template>
@@ -41,11 +54,16 @@ import Splash from './components/Splash.vue'
 import Panorama from './components/Panorama.vue'
 import Map from './components/Map.vue'
 import Results from './components/Results.vue'
+import EndResults from './components/EndResults.vue'
 
-import get from './lib/fetch'
-import { post } from './lib/fetch'
+import { sum } from 'lodash'
+
+import get, { post } from './lib/fetch'
+import { calculatePoints } from './lib/util'
 import nearestImage from './lib/api'
 import RandomPoint from './lib/random-point'
+
+const devMode = process.env && process.env.NODE_ENV === 'development'
 
 export default {
   name: 'app',
@@ -53,17 +71,21 @@ export default {
     Splash,
     Panorama,
     Map,
-    Results
+    Results,
+    EndResults
   },
   data: function () {
     return {
       showingSplash: true,
+      showEndResults: false,
       mapToggled: false,
       image: undefined,
       submittedPoint: undefined,
       error: undefined,
       randomPoint: undefined,
-      lastClickedPoint: undefined
+      lastClickedPoint: undefined,
+      nrOfRounds: 5,
+      rounds: []
     }
   },
   mounted: function () {
@@ -73,9 +95,32 @@ export default {
       })
       .then(this.newImage)
   },
+  computed: {
+    points: function () {
+      return sum(this.rounds.map((round) => round.distance ? calculatePoints(round.distance) : 0))
+    }
+  },
   methods: {
+    nextRound: function (distanceToImage) {
+      this.rounds.push({
+        distance: distanceToImage || null,
+        submittedPoint: this.submittedPoint,
+        image: this.image
+      })
+
+      this.lastClickedPoint = undefined
+      this.submittedPoint = undefined
+
+      if (this.rounds.length === this.nrOfRounds) {
+        this.mapToggled = false
+        this.showEndResults = true
+      } else {
+        this.newImage()
+      }
+    },
     newImage: function () {
       this.mapToggled = false
+      this.showEndResults = false
       if (this.randomPoint) {
         nearestImage(this.randomPoint())
           .then((image) => {
@@ -84,6 +129,15 @@ export default {
             this.image = image
         })
       }
+    },
+    newGame: function () {
+      this.rounds = []
+      this.mapToggled = false
+      this.showEndResults = false
+      this.lastClickedPoint = undefined
+      this.submittedPoint = undefined
+
+      this.newImage()
     },
     toggle: function () {
       this.mapToggled = !this.mapToggled
@@ -99,10 +153,12 @@ export default {
           }
         }
 
-        post('https://waar-ben-ik.glitch.me/submissions', submission)
-          .catch(() => {
-            // console.error(err.message)
-          })
+        if (!devMode) {
+          post('https://waar-ben-ik.glitch.me/submissions', submission)
+            .catch(() => {
+              // console.error(err.message)
+            })
+        }
 
         this.submittedPoint = this.lastClickedPoint
       }
@@ -178,7 +234,7 @@ button {
   border-style: solid;
   border-color: white;
   padding: 1em;
-  transition: background-color .1s, border-color .1s;
+  transition: background-color 0.15s, border-color 0.15s;
   max-width: 200px;
   width: 200px;
   margin: 0 auto;
@@ -247,7 +303,7 @@ main {
   height: 400px;
   width: 400px;
   max-width: calc(100% - 10px);
-  max-height: 50%;
+  max-height: 60%;
 }
 
 .inset > * {
@@ -257,12 +313,8 @@ main {
   pointer-events: all;
 }
 
-.inset > *:not(:last-child) {
-  /* padding-bottom: 12px; */
-}
-
 .inset-toggle {
-  transition: width .1s, height .1s, padding .1s;
+  transition: width 0.15s, height 0.15s, padding 0.15s;
   display: flex;
   flex-direction: column;
   height: 100%;
@@ -273,21 +325,20 @@ main {
   display: flex;
   justify-content: flex-end;
   padding-top: 10px;
-  /* padding: 10px; */
 }
 
 .buttons > button:not(:first-child) {
   margin-left: 10px;
 }
 
-button.new-image {
+button.skip-image {
   color: white;
   background-color: #ec0000;
-  border-color: #ec0000;
+  /* border-color: #ec0000; */
 }
 
-.new-image:not(:disabled):hover {
-  border-color: white;
+button.skip-image:hover {
+  border-color: rgba(255, 255, 255, 0.5);
 }
 
 button:disabled {
@@ -299,13 +350,36 @@ button:disabled {
   border-radius: 0;
 }
 
+.game-status {
+  top: 0;
+  position: absolute;
+  padding: 5px;
+  width: 100%;
+  box-sizing: border-box;
+  display: flex;
+  /* flex-direction: column; */
+  justify-content: flex-end;
+}
+
+.game-status > * {
+  background-color: #ec0000;
+  padding: 5px 10px;
+  margin: 5px;
+}
+
+.game-status span {
+  font-family: 'Source Code Pro', monospace;
+  color: white;
+  font-weight: bold;
+}
+
 @media only screen and (max-width: 768px) {
   header {
     justify-content: center;
   }
 
   header a {
-    margin: 9px 6px;
+    margin: 5px 6px;
     width: 80px;
   }
 
@@ -346,6 +420,11 @@ button:disabled {
     height: 100%;
     padding: 10px;
     padding-bottom: 0;
+  }
+
+  .game-status {
+    flex-direction: row;
+    justify-content: space-between;
   }
 }
 

@@ -7,7 +7,7 @@ function nearestUrl (point, radius) {
   return `${baseUrl}/panoramas/?near=${lon},${lat}&srid=4326&radius=${radius}&page_size=1`
 }
 
-export default function nearestImage (point, radius=250) {
+export default function nearestImage (point, radius = 250) {
   return get(nearestUrl(point, radius))
     .then((nearest) => {
       try {

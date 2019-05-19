@@ -5,6 +5,7 @@
 <script>
 /* global L */
 
+import { createMap } from '../lib/util'
 import { marker } from '../lib/markers'
 
 export default {
@@ -14,19 +15,10 @@ export default {
     toggled: Boolean
   },
   mounted: function () {
-    const element = this.$refs.map
-    const map = L.map(element).setView([52.369, 4.922], 12)
-
-    // const tileUrl = 'https://{s}.data.amsterdam.nl/topo_wm_light/{z}/{x}/{y}.png'
-    const tileUrl = 'https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}.png'
-
-    L.tileLayer(tileUrl, {
-      // subdomains: ['t1', 't2', 't3', 't4'],
-      maxZoom: 19
-    }).addTo(map)
+    const map = createMap(this.$refs.map)
 
     const guessLayer =  L.geoJSON(null, {
-      pointToLayer: function (feature, latLng) {
+      pointToLayer: (feature, latLng) => {
         return marker(latLng)
       }
     }).addTo(map)
