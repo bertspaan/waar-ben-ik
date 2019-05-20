@@ -2,10 +2,13 @@
 
 import { marker, flag } from './markers'
 
+const minZoom = 9
+const maxZoom = 19
+
 export function createMap (element) {
   const map = L.map(element, {
-    minZoom: 8,
-    maxZoom: 19,
+    minZoom,
+    maxZoom,
     center: [52.37278, 4.90034],
     zoom: 11
   })
@@ -21,8 +24,8 @@ export function createMap (element) {
   const tileUrl = `https://api.mapbox.com/styles/v1/bertspaan/cjvtebmyb0q071co9dq8qajp0/tiles/256/{z}/{x}/{y}@2x?access_token=${mapboxToken}`
 
   L.tileLayer(tileUrl, {
-    minZoom: 8,
-    maxZoom: 19
+    minZoom,
+    maxZoom
   }).addTo(map)
 
   return map
