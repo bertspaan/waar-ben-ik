@@ -14,11 +14,11 @@
         <p>
           In {{rounds.length}} rondes zat je er totaal {{sumDistance | formatDistance}} naast, dat is gemiddeld {{avgDistance | formatDistance}} per ronde.
         </p>
-        <!-- link naar observable! -->
-        <!-- zoverel punten! daag een vriend uit! -->
+        <!-- Link naar Observable! -->
+        <!-- Zoveel punten! Daag een vriend uit! -->
       </div>
 
-      <button @click="closeClick">Nog een keer!</button>
+      <button @click="closeClick">Nieuw spel</button>
     </div>
   </div>
 </template>
