@@ -10,7 +10,8 @@ export function createMap (element) {
     minZoom,
     maxZoom,
     center: [52.37278, 4.90034],
-    zoom: 11
+    zoom: 11,
+    attribution: '© <a href="https://www.mapbox.com/feedback/">Mapbox</a> © <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>'
   })
 
   // const tileUrl = 'https://t{s}.data.amsterdam.nl/topo_wm_light/{z}/{x}/{y}.png'
