@@ -10,19 +10,19 @@ export function createMap (element) {
     minZoom,
     maxZoom,
     center: [52.37278, 4.90034],
-    zoom: 11,
-    attribution: '© <a href="https://www.mapbox.com/feedback/">Mapbox</a> © <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>'
+    zoom: 11
+    // attribution: '© <a href="https://www.mapbox.com/feedback/">Mapbox</a> © <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>'
   })
 
   // const tileUrl = 'https://t{s}.data.amsterdam.nl/topo_wm_light/{z}/{x}/{y}.png'
-  // const tileUrl = 'https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}.png'
+  const tileUrl = 'https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}.png'
   // const tileUrl = 'https://geodata.nationaalgeoregister.nl/tiles/service/wmts?' +
   //   'layer=brtachtergrondkaart&style=default&tilematrixset=EPSG%3A3857&Service=WMTS' +
   //   '&Request=GetTile&Version=1.0.0&Format=image%2Fpng&TileMatrix={z}&TileCol={x}&TileRow={y}'
 
-  const mapboxToken = 'pk.eyJ1IjoiYmVydHNwYWFuIiwiYSI6ImNqdnRlZ2g5NzM1NGw0OXJ0MTh0cWxtcTQifQ.pokO3qHHr-_lHZaJpmY4WQ'
-  // const mapboxToken = 'pk.eyJ1IjoiYmVydHNwYWFuIiwiYSI6ImR3dERiQk0ifQ.DLbScmbRohc3Sqv7prfhqw'
-  const tileUrl = `https://api.mapbox.com/styles/v1/bertspaan/cjvtebmyb0q071co9dq8qajp0/tiles/256/{z}/{x}/{y}@2x?access_token=${mapboxToken}`
+  // const mapboxToken = 'pk.eyJ1IjoiYmVydHNwYWFuIiwiYSI6ImNqdnRlZ2g5NzM1NGw0OXJ0MTh0cWxtcTQifQ.pokO3qHHr-_lHZaJpmY4WQ'
+  // // const mapboxToken = 'pk.eyJ1IjoiYmVydHNwYWFuIiwiYSI6ImR3dERiQk0ifQ.DLbScmbRohc3Sqv7prfhqw'
+  // const tileUrl = `https://api.mapbox.com/styles/v1/bertspaan/cjvtebmyb0q071co9dq8qajp0/tiles/256/{z}/{x}/{y}@2x?access_token=${mapboxToken}`
 
   L.tileLayer(tileUrl, {
     minZoom,
