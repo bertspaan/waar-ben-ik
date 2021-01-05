@@ -11,7 +11,7 @@
   "dependencies": {
     "@turf/area": "^6.0.1",
     "@turf/distance": "^6.0.1",
-    "axios": "^0.18.0",
+    "axios": "^0.21.1",
     "lodash": "^4.17.11",
     "marzipano": "^0.8.0",
     "vue": "^2.6.6"
