@@ -21,6 +21,12 @@
       <p>
         Gemaakt door <a href="https://bertspaan.nl/">Bert Spaan</a>, ontworpen door <a href="http://luukvandeven.nl/">Luuk van de Ven</a>. De broncode staat <a href="https://github.com/bertspaan/waar-ben-ik">op GitHub</a>.
       </p>
+      <p class="map-attribution">
+        Kaart gemaakt met <a href="https://maplibre.org/">MapLibre</a> en
+        <a href="https://openfreemap.org/">OpenFreeMap</a>, met gegevens van
+        <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>
+        (<a href="https://www.openmaptiles.org/">© OpenMapTiles</a>).
+      </p>
     </div>
   </div>
 </template>
@@ -41,6 +47,16 @@ export default defineComponent({
 <style scoped>
 .box p:first-of-type {
   font-weight: bolder;
+}
+
+.map-attribution {
+  margin-top: 0;
+  font-size: 0.75rem;
+  line-height: 1.5;
+}
+
+.map-attribution a {
+  font-weight: normal;
 }
 
 h1 {

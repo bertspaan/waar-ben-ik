@@ -12,6 +12,7 @@ setWorkerUrl(workerUrl)
 export function createMap (element: HTMLElement) {
   const map = new Map({
     container: element,
+    attributionControl: false,
     style: 'https://tiles.openfreemap.org/styles/positron',
     center: [4.90034, 52.37278],
     // MapLibre uses 512px tiles: one zoom level lower matches Leaflet’s view.
