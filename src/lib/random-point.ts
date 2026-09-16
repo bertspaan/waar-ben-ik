@@ -1,21 +1,21 @@
 import area from '@turf/area'
+import type { Point, Position } from 'geojson'
+import type { Coordinates, Triangulation } from '../types'
 
-export default function RandomPoint (triangulation) {
+export default function RandomPoint (triangulation: Triangulation): () => Point {
   const areas = triangulation.features
-    .map((triangle) => area(triangle, {
-      units: 'meters'
-    }))
+    .map((triangle) => area(triangle))
 
   const totalArea = areas.reduce((sum, area) => sum + area, 0)
 
-  function scalePoint (point, s) {
+  function scalePoint (point: Position, s: number): Coordinates {
     return [
       point[0] * s,
       point[1] * s
     ]
   }
 
-  function translatePoint (point1, point2) {
+  function translatePoint (point1: Position, point2: Position): Coordinates {
     return [
       point1[0] + point2[0],
       point1[1] + point2[1]

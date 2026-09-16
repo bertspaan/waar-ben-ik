@@ -2,59 +2,56 @@
   <div class="map" ref="map" />
 </template>
 
-<script>
-/* global L */
-
+<script lang="ts">
+import { defineComponent, markRaw } from 'vue'
+import type { PropType, Raw } from 'vue'
+import type { Map, Marker } from 'maplibre-gl'
+import type { Point } from 'geojson'
+import { coordinates2D } from '../types'
+import type { Panorama } from '../types'
 import { createMap } from '../lib/util'
 import { marker } from '../lib/markers'
 
-export default {
-  name: 'Map',
+export default defineComponent({
+  name: 'GameMap',
+  emits: { click: (_point: Point) => true },
   props: {
-    image: Object,
-    toggled: Boolean
+    image: Object as PropType<Panorama>
   },
-  mounted: function () {
-    const map = createMap(this.$refs.map)
-
-    const guessLayer =  L.geoJSON(null, {
-      pointToLayer: (feature, latLng) => {
-        return marker(latLng)
-      }
-    }).addTo(map)
-
-    map.on('click', (event) => {
-      const point = {
+  data (): { map?: Raw<Map>; guessMarker?: Raw<Marker> } {
+    return { map: undefined, guessMarker: undefined }
+  },
+  mounted () {
+    this.map = markRaw(createMap(this.$refs.map as HTMLElement))
+    this.map.on('click', (event) => {
+      this.mapClick({
         type: 'Point',
-        coordinates: [event.latlng.lng, event.latlng.lat]
-      }
-
-      this.mapClick(point)
+        coordinates: [event.lngLat.lng, event.lngLat.lat]
+      })
     })
-
-    this.guessLayer = guessLayer
-    this.map = map
+  },
+  beforeUnmount () {
+    this.guessMarker?.remove()
+    this.map?.remove()
   },
   watch: {
-    image: function () {
-      this.guessLayer.clearLayers()
-    },
-    toggled: function () {
-      if (this.toggled) {
-        window.setTimeout(() => {
-          this.map.invalidateSize()
-        }, 150)
-      }
+    image () {
+      this.guessMarker?.remove()
+      this.guessMarker = undefined
     }
   },
   methods: {
-    mapClick: function (point) {
+    mapClick (point: Point) {
+      if (!this.map) return
       this.$emit('click', point)
-      this.guessLayer.clearLayers()
-      this.guessLayer.addData(point)
+      if (this.guessMarker) {
+        this.guessMarker.setLngLat(coordinates2D(point))
+      } else {
+        this.guessMarker = markRaw(marker(coordinates2D(point)).addTo(this.map))
+      }
     }
   }
-}
+})
 </script>
 
 <style scoped>

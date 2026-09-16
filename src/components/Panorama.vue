@@ -4,34 +4,43 @@
   </div>
 </template>
 
-<script>
-import Marzipano from 'marzipano'
+<script lang="ts">
+import { defineComponent, markRaw } from 'vue'
+import type { PropType, Raw } from 'vue'
+import type { Panorama } from '../types'
+import * as Marzipano from 'marzipano'
 
-export default {
+export default defineComponent({
   name: 'Panorama',
   props: {
-    image: Object
+    image: Object as PropType<Panorama>
+  },
+  data (): { viewer?: Raw<Marzipano.Viewer> } {
+    return { viewer: undefined }
   },
   mounted: function () {
-    const element = this.$refs.marzipano
+    const element = this.$refs.marzipano as HTMLElement
 
-    var viewerOptions = {
-      stageType: null,
+    const viewerOptions = {
       stage: {
         preserveDrawingBuffer: true,
         width: 960
       }
     }
 
-    this.viewer = new Marzipano.Viewer(element, viewerOptions)
+    this.viewer = markRaw(new Marzipano.Viewer(element, viewerOptions))
+  },
+  beforeUnmount () {
+    this.viewer?.destroy()
   },
   watch: {
     image: function (newImage) {
-      this.createScene(newImage)
+      if (newImage) this.createScene(newImage)
     }
   },
   methods: {
-    createScene (image) {
+    createScene (image: Panorama) {
+      if (!this.viewer) return
       const source = Marzipano.ImageUrlSource.fromString(image.cubic_img_pattern, {
         cubeMapPreviewUrl: image._links.cubic_img_preview.href
       })
@@ -77,7 +86,7 @@ export default {
       })
     }
   }
-}
+})
 </script>
 
 <style scoped>

@@ -11,19 +11,20 @@
   </ol>
 </template>
 
-<script>
-import { stars } from '../lib/util.js'
+<script lang="ts">
+import { defineComponent } from 'vue'
+import { stars } from '../lib/util'
 
-export default {
+export default defineComponent({
   data() {
     return {
       points: stars
     }
   },
   props: {
-    distanceToImage: Number
+    distanceToImage: { type: Number, required: true }
   }
-}
+})
 </script>
 
 <style scoped>

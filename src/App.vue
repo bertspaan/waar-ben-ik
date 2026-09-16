@@ -8,13 +8,13 @@
     </header>
     <main>
       <Panorama class="panorama" :image="image" />
-      <div v-if="!submittedPoint && !showingSplash"
+      <div v-if="!submittedPoint && !showingSplash && !showEndResults"
         :class="['inset', mapToggled ? 'toggled' : '']">
         <div class="inset-toggle">
-          <Map :image="image" @click="handleMapClicked" :toggled="mapToggled" />
+          <GameMap :image="image" @click="handleMapClicked" />
           <div class="buttons">
             <button class="skip-image" @click="nextRound()">Weet ik niet</button>
-            <button @click="submit" v:if :disabled="lastClickedPoint === undefined">Hier ben ik</button>
+            <button @click="submit" :disabled="lastClickedPoint === undefined">Hier ben ik</button>
           </div>
         </div>
         <div class="buttons show-map">
@@ -28,7 +28,7 @@
       </div>
       <div class="game-status" v-if="!showEndResults">
         <div class="rounds">
-          <span>Foto {{this.rounds.length + 1}}/{{this.nrOfRounds}}</span>
+          <span>Foto {{rounds.length + 1}}/{{nrOfRounds}}</span>
         </div>
         <div class="points">
           <span>{{points}}&nbsp;punten</span>
@@ -41,7 +41,7 @@
     <template v-else-if="showEndResults">
       <EndResults :rounds="rounds" @close="newGame" />
     </template>
-    <template v-else-if="submittedPoint">
+    <template v-else-if="submittedPoint && image">
       <Results :image="image" :submittedPoint="submittedPoint"
         :buttonText="(rounds.length === nrOfRounds - 1) ? 'Naar eindresultaat' : 'Volgende foto'"
         @close="nextRound" />
@@ -49,10 +49,26 @@
   </div>
 </template>
 
-<script>
+<script lang="ts">
+import { defineComponent } from 'vue'
+import type { Point } from 'geojson'
+import { coordinates2D } from './types'
+import type { Panorama as PanoramaImage, Round, Submission, Triangulation } from './types'
+
+interface GameState {
+  showingSplash: boolean
+  showEndResults: boolean
+  mapToggled: boolean
+  image?: PanoramaImage
+  submittedPoint?: Point
+  randomPoint?: () => Point
+  lastClickedPoint?: Point
+  nrOfRounds: number
+  rounds: Round[]
+}
 import Splash from './components/Splash.vue'
 import Panorama from './components/Panorama.vue'
-import Map from './components/Map.vue'
+import GameMap from './components/Map.vue'
 import Results from './components/Results.vue'
 import EndResults from './components/EndResults.vue'
 
@@ -63,25 +79,24 @@ import { calculatePoints } from './lib/util'
 import nearestImage from './lib/api'
 import RandomPoint from './lib/random-point'
 
-const devMode = process.env && process.env.NODE_ENV === 'development'
+const devMode = import.meta.env.DEV
 
-export default {
+export default defineComponent({
   name: 'app',
   components: {
     Splash,
     Panorama,
-    Map,
+    GameMap,
     Results,
     EndResults
   },
-  data: function () {
+  data: function (): GameState {
     return {
       showingSplash: true,
       showEndResults: false,
       mapToggled: false,
       image: undefined,
       submittedPoint: undefined,
-      error: undefined,
       randomPoint: undefined,
       lastClickedPoint: undefined,
       nrOfRounds: 5,
@@ -89,7 +104,7 @@ export default {
     }
   },
   mounted: function () {
-    get('area-triangulation.geojson')
+    get<Triangulation>('area-triangulation.geojson')
       .then((polygon) => {
         this.randomPoint = RandomPoint(polygon)
       })
@@ -97,16 +112,20 @@ export default {
   },
   computed: {
     points: function () {
-      return sum(this.rounds.map((round) => round.distance ? calculatePoints(round.distance) : 0))
+      return sum(this.rounds.map((round) => round.distance !== null ? calculatePoints(round.distance) : 0))
     }
   },
   methods: {
-    nextRound: function (distanceToImage) {
-      this.rounds.push({
-        distance: distanceToImage || null,
-        submittedPoint: this.submittedPoint,
-        image: this.image
-      })
+    nextRound: function (distanceToImage?: number) {
+      if (distanceToImage !== undefined && this.image && this.submittedPoint) {
+        this.rounds.push({
+          distance: distanceToImage,
+          submittedPoint: this.submittedPoint,
+          image: this.image
+        })
+      } else {
+        this.rounds.push({ distance: null, image: this.image })
+      }
 
       this.lastClickedPoint = undefined
       this.submittedPoint = undefined
@@ -144,12 +163,12 @@ export default {
     },
     submit: function () {
       if (this.image && this.lastClickedPoint) {
-        const submission = {
+        const submission: Submission = {
           panoramaId: this.image.pano_id,
           pointSubmission: this.lastClickedPoint,
           pointLocation: {
             type: 'Point',
-            coordinates: this.image.geometry.coordinates.slice(0, 2)
+            coordinates: coordinates2D(this.image.geometry)
           }
         }
 
@@ -169,11 +188,11 @@ export default {
     hideSplash: function () {
       this.showingSplash = false
     },
-    handleMapClicked: function (point) {
+    handleMapClicked: function (point: Point) {
       this.lastClickedPoint = point
     }
   }
-}
+})
 </script>
 
 <style>
@@ -224,7 +243,7 @@ p a, p a:visited {
   margin: 0 auto;
 }
 
-button {
+button:not(.maplibregl-ctrl button):not(.maplibregl-popup-close-button) {
   cursor: pointer;
   background-color: white;
   color: #ec0000;
@@ -240,7 +259,7 @@ button {
   margin: 0 auto;
 }
 
-button:not(:disabled):hover {
+button:not(.maplibregl-ctrl button):not(.maplibregl-popup-close-button):not(:disabled):hover {
   background-color: #ec0000;
   color: white;
 }
@@ -295,7 +314,6 @@ main {
 .inset {
   position: absolute;
   z-index: 1000;
-  box-sizing: border-box;
   right: 0;
   bottom: 0;
   box-sizing: border-box;
@@ -346,7 +364,8 @@ button:disabled {
   cursor: default;
 }
 
-.leaflet-popup-content-wrapper {
+.maplibregl-popup-content {
+  color: #222;
   border-radius: 0;
 }
 

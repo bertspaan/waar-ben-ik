@@ -15,31 +15,43 @@
   </div>
 </template>
 
-<script>
+<script lang="ts">
+import { defineComponent, markRaw } from 'vue'
+import type { PropType, Raw } from 'vue'
+import type { Map } from 'maplibre-gl'
+import type { Point } from 'geojson'
+import type { Panorama } from '../types'
 import Stars from './Stars.vue'
 import distance from '@turf/distance'
-import { resultGeoJSON, addResultsLayer, calculatePoints, createMap, formatDistance } from '../lib/util.js'
+import { resultGeoJSON, addResultsLayer, calculatePoints, createMap, formatDistance } from '../lib/util'
 
-export default {
+export default defineComponent({
   components: {
     Stars
   },
+  emits: { close: (_distance: number) => true },
   name: 'Results',
   props: {
-    buttonText: String,
-    image: Object,
-    submittedPoint: Object
+    buttonText: { type: String, required: true },
+    image: { type: Object as PropType<Panorama>, required: true },
+    submittedPoint: { type: Object as PropType<Point>, required: true }
+  },
+  data (): { map?: Raw<Map> } {
+    return { map: undefined }
   },
   mounted: function () {
-    const map = createMap(this.$refs.map)
+    const map = createMap(this.$refs.map as HTMLElement)
 
     const geojson = resultGeoJSON([{
       image: this.image,
       submittedPoint: this.submittedPoint
     }])
 
-    this.resultsLayer = addResultsLayer(map, geojson)
-    this.map = map
+    addResultsLayer(map, geojson)
+    this.map = markRaw(map)
+  },
+  beforeUnmount () {
+    this.map?.remove()
   },
   methods: {
     closeClick: function () {
@@ -59,7 +71,7 @@ export default {
       return formatDistance(this.distanceToImage)
     }
   }
-}
+})
 </script>
 
 <style scoped>

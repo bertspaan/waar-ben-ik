@@ -12,7 +12,7 @@
       <div class="map" ref="map" />
       <div class="explain">
         <p>
-          In {{rounds.length}} rondes zat je er totaal {{sumDistance | formatDistance}} naast, dat is gemiddeld {{avgDistance | formatDistance}} per ronde.
+          In {{rounds.length}} rondes zat je er totaal {{formatDistance(sumDistance)}} naast, dat is gemiddeld {{formatDistance(avgDistance)}} per ronde.
         </p>
         <!-- Link naar Observable! -->
         <!-- Zoveel punten! Daag een vriend uit! -->
@@ -23,28 +23,36 @@
   </div>
 </template>
 
-<script>
+<script lang="ts">
+import { defineComponent, markRaw } from 'vue'
+import type { PropType, Raw } from 'vue'
+import type { Map } from 'maplibre-gl'
+import type { GuessedRound, Round } from '../types'
 import { mean, sum } from 'lodash'
 import Stars from './Stars.vue'
-import { resultGeoJSON, addResultsLayer, createMap, calculatePoints, formatDistance } from '../lib/util.js'
+import { resultGeoJSON, addResultsLayer, createMap, calculatePoints, formatDistance } from '../lib/util'
 
-export default {
+export default defineComponent({
+  emits: ['close'],
   name: 'EndResults',
   components: {
     Stars
   },
   props: {
-    rounds: Array
+    rounds: { type: Array as PropType<Round[]>, required: true }
+  },
+  data (): { map?: Raw<Map> } {
+    return { map: undefined }
   },
   mounted: function () {
-    const map = createMap(this.$refs.map)
+    const map = createMap(this.$refs.map as HTMLElement)
 
-    const results = this.rounds.filter((round) => round.distance !== null)
+    const results = this.rounds.filter((round): round is GuessedRound => round.distance !== null)
 
     const geojson = resultGeoJSON(results)
 
-    this.resultsLayer = addResultsLayer(map, geojson)
-    this.map = map
+    addResultsLayer(map, geojson)
+    this.map = markRaw(map)
   },
   computed: {
     avgDistance () {
@@ -54,18 +62,19 @@ export default {
       return sum(this.rounds.map((round) => round.distance))
     },
     points: function () {
-      return sum(this.rounds.map((round) => round.distance ? calculatePoints(round.distance) : 0))
+      return sum(this.rounds.map((round) => round.distance !== null ? calculatePoints(round.distance) : 0))
     }
   },
+  beforeUnmount () {
+    this.map?.remove()
+  },
   methods: {
+    formatDistance,
     closeClick () {
       this.$emit('close')
     }
-  },
-  filters: {
-    formatDistance
   }
-}
+})
 </script>
 
 <style scoped>

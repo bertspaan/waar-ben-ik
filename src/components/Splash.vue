@@ -25,15 +25,17 @@
   </div>
 </template>
 
-<script>
-export default {
+<script lang="ts">
+import { defineComponent } from 'vue'
+export default defineComponent({
   name: 'Splash',
+  emits: ['hide'],
   methods: {
     start: function () {
       this.$emit('hide')
     }
   }
-}
+})
 </script>
 
 <style scoped>
